@@ -24,15 +24,36 @@ Seleção e mapeamento de imagens em alta definição (Official Artwork).
 
 Load (Carga): Exportação dos dados processados para formato .csv estruturado.
 
-Analytics & Viz (Power BI):
+Destaques de Engenharia no Power BI
 
-Modelagem de Dados utilizando Star Schema simplificado e Tabelas Desconectadas para simulação de cenários.
+Além da visualização, este projeto aplicou técnicas avançadas de manipulação de dados utilizando a linguagem M (Power Query) e DAX para resolver problemas de negócio complexos.
 
-Transformação no Power Query (Unpivot de colunas de estatísticas para viabilizar gráficos de Radar).
+1. Tratamento de Dados Dinâmico (Web Scraping via Power Query)
 
-Desenvolvimento de lógica de negócio com DAX Avançado (SWITCH, LOOKUPVALUE, SELECTEDVALUE).
+Para obter a tabela de vantagens de tipos (Type Chart), não foi utilizado um arquivo estático, mas sim uma conexão direta via Web Scraping. O script em M foi desenvolvido para ser resiliente a mudanças no cabeçalho da fonte HTML.
 
-Design de Interface (UI) inspirado em consoles clássicos.
+// Técnica de Renomeação Dinâmica para evitar quebra do ETL se o cabeçalho do site mudar
+ColNames = Table.ColumnNames(#"Promoted Headers"),
+FirstColName = ColNames{0}, // Pega o nome da primeira coluna dinamicamente
+#"Renamed Columns" = Table.RenameColumns(#"Promoted Headers", {{FirstColName, "Atacante"}}),
+
+
+2. Normalização de Dados (Unpivot)
+
+A fonte de dados de vantagens estava em formato de Matriz (Pivot Table), inadequada para modelagem dimensional. Foi aplicada a técnica de Unpivot para normalizar a tabela em um formato Tidy Data (Atacante | Defensor | Multiplicador), permitindo relacionamentos eficientes no modelo de dados.
+
+3. Limpeza de Dados Complexa (Data Cleaning)
+
+Tratamento de inconsistências e caracteres especiais diretamente no fluxo de ETL:
+
+Conversão de frações em texto (½) para decimais (0.5).
+
+Imputação de valores nulos (Null Handling) assumindo neutralidade (1.0).
+
+Criação de Chaves Substitutas (Surrogate Keys) condicionais para otimizar a ordenação de categorias textuais.
+
+// Exemplo de lógica condicional aplicada no Power Query
+each if _ = "½" then 0.5 else if _ = "" or _ = null then 1 else Number.From(_)
 
 Tecnologias Utilizadas
 
